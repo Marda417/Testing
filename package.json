@@ -1,0 +1,22 @@
+{
+  "name": "finance-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal finance tracker for ANZ Plus, ANZ credit card and Amex, with income detection and advice",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env src/server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env --watch src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "chart.js": "^4.4.1",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}

@@ -1,9 +1,6 @@
-.gradle
-build
-.idea/
-.project
-.settings/
-.classpath
-nbactions.xml
-nb-configuration.xml
-nbproject/
+node_modules/
+data/
+.env
+*.log
+.DS_Store
+samples/

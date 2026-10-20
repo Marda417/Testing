@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Finances</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="/vendor/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>My Finances</h1>
+    <nav id="tabs">
+      <button data-tab="dashboard" class="active">Dashboard</button>
+      <button data-tab="transactions">Transactions</button>
+      <button data-tab="advice">Advice</button>
+      <button data-tab="accounts">Accounts &amp; import</button>
+      <button data-tab="settings">Budgets &amp; rules</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="dashboard" class="tab active">
+      <div id="empty-state" class="card hidden">
+        <h2>Welcome</h2>
+        <p>Start by adding your accounts and importing a CSV statement from each, or connect your banks for automatic sync.</p>
+        <button class="primary" data-goto="accounts">Add accounts &amp; import</button>
+      </div>
+      <p class="muted" id="as-of"></p>
+      <div class="stats" id="stats"></div>
+      <div class="grid two">
+        <div class="card">
+          <h2>Income vs spending</h2>
+          <div class="chart"><canvas id="chart-months"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>This month by category</h2>
+          <div class="chart"><canvas id="chart-categories"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Insights</h2>
+        <ul id="insights" class="insights"></ul>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h2>Income learned from your deposits</h2>
+          <table id="income-table"></table>
+        </div>
+        <div class="card">
+          <h2>Recurring bills &amp; subscriptions</h2>
+          <table id="bills-table"></table>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Top merchants this month</h2>
+        <table id="merchants-table"></table>
+      </div>
+    </section>
+
+    <!-- Transactions -->
+    <section id="transactions" class="tab">
+      <div class="card">
+        <div class="filters">
+          <input type="search" id="f-q" placeholder="Search description">
+          <select id="f-account"><option value="">All accounts</option></select>
+          <select id="f-category"><option value="">All categories</option></select>
+          <input type="date" id="f-from" aria-label="From">
+          <input type="date" id="f-to" aria-label="To">
+        </div>
+        <p class="muted" id="tx-count"></p>
+        <div class="table-wrap">
+          <table id="tx-table" class="tx"></table>
+        </div>
+        <button id="tx-more" class="hidden">Load more</button>
+      </div>
+    </section>
+
+    <!-- Advice -->
+    <section id="advice" class="tab">
+      <div class="card">
+        <h2>Ask about your money</h2>
+        <p class="muted" id="advice-note">The advisor sees totals, categories, income and bills computed from your transactions — not individual transactions.</p>
+        <div id="chat" class="chat"></div>
+        <form id="advice-form" class="advice-form">
+          <textarea id="advice-q" rows="2" placeholder="e.g. Where can I cut back to save $500 a month?"></textarea>
+          <div class="row">
+            <button type="submit" class="primary">Ask</button>
+            <button type="button" id="advice-review">Review my finances</button>
+            <button type="button" id="advice-clear">New conversation</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Accounts & import -->
+    <section id="accounts" class="tab">
+      <div class="grid two">
+        <div class="card">
+          <h2>Your accounts</h2>
+          <table id="accounts-table"></table>
+          <h3>Add an account</h3>
+          <form id="account-form" class="stack">
+            <div class="row">
+              <button type="button" class="preset" data-name="ANZ Plus" data-institution="anz_plus" data-type="transaction">ANZ Plus</button>
+              <button type="button" class="preset" data-name="ANZ Credit Card" data-institution="anz_credit" data-type="credit">ANZ credit card</button>
+              <button type="button" class="preset" data-name="Amex" data-institution="amex" data-type="credit">Amex</button>
+            </div>
+            <input name="name" placeholder="Account name" required>
+            <div class="row">
+              <select name="institution">
+                <option value="anz_plus">ANZ Plus</option>
+                <option value="anz_credit">ANZ credit card</option>
+                <option value="amex">American Express</option>
+                <option value="other">Other</option>
+              </select>
+              <select name="type">
+                <option value="transaction">Everyday / savings</option>
+                <option value="credit">Credit card</option>
+              </select>
+            </div>
+            <button type="submit" class="primary">Add account</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Import a CSV statement</h2>
+          <form id="import-form" class="stack">
+            <select name="accountId" id="import-account" required></select>
+            <label class="drop" id="drop">
+              <input type="file" name="file" id="import-file" accept=".csv,text/csv" multiple>
+              <span id="drop-label">Drop CSV files here or click to choose</span>
+            </label>
+            <button type="submit" class="primary">Import</button>
+          </form>
+          <div id="import-result"></div>
+          <details>
+            <summary>Where do I get the CSV?</summary>
+            <ul class="help">
+              <li><strong>ANZ Plus:</strong> in the ANZ Plus app, open your account → Statements / Transaction history → Export, choose CSV and a date range.</li>
+              <li><strong>ANZ credit card:</strong> ANZ Internet Banking → select the card → Download transactions → CSV.</li>
+              <li><strong>Amex:</strong> americanexpress.com.au → Statements &amp; activity → Download → CSV.</li>
+            </ul>
+            <p class="muted">Re-importing overlapping statements is safe; duplicates are skipped. Amex exports purchases as positive numbers — that's detected automatically.</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="card" id="basiq-card">
+        <h2>Automatic bank sync (open banking)</h2>
+        <div id="basiq-body"></div>
+      </div>
+    </section>
+
+    <!-- Budgets & rules -->
+    <section id="settings" class="tab">
+      <div class="grid two">
+        <div class="card">
+          <h2>Monthly budgets</h2>
+          <table id="budgets-table"></table>
+          <form id="budget-form" class="row">
+            <select name="category" id="budget-category"></select>
+            <input name="monthly_limit" type="number" min="1" step="1" placeholder="$ per month" required>
+            <button type="submit" class="primary">Set</button>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Learned category rules</h2>
+          <p class="muted">Created when you categorise a transaction with "apply to similar". Matching text is checked against each transaction's description.</p>
+          <table id="rules-table"></table>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Data</h2>
+        <div class="row">
+          <a class="button" href="/api/export.csv">Export all transactions (CSV)</a>
+          <button id="rematch">Re-detect transfers between accounts</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="cat-dialog">
+    <form method="dialog" id="cat-form" class="stack">
+      <h3>Categorise</h3>
+      <p id="cat-desc" class="muted"></p>
+      <select id="cat-select"></select>
+      <label class="check"><input type="checkbox" id="cat-similar" checked> Apply to similar transactions (learn a rule)</label>
+      <label>Matching text <input id="cat-pattern"></label>
+      <div class="row">
+        <button value="cancel" formnovalidate>Cancel</button>
+        <button value="save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
